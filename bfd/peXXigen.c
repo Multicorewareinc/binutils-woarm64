@@ -4716,6 +4716,13 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 #if !defined(COFF_WITH_pep) && (defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64) || defined(COFF_WITH_peLoongArch64) || defined (COFF_WITH_peRiscV64))
   {
     asection *sec = bfd_get_section_by_name (abfd, ".pdata");
+#if defined (COFF_WITH_peAArch64)
+/* https://learn.microsoft.com/en-us/cpp/build/arm64-exception-handling#pdata-records.  */
+  #define FUNCTION_TABLE_ENTRY_SIZE 8
+#else
+/* https://learn.microsoft.com/en-us/windows/win32/debug/pe-format#the-pdata-section.  */
+  #define FUNCTION_TABLE_ENTRY_SIZE 12
+#endif
 
     if (sec)
       {
@@ -4725,8 +4732,8 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	if (bfd_malloc_and_get_section (abfd, sec, &tmp_data))
 	  {
 	    qsort (tmp_data,
-		   (size_t) (x / 12),
-		   12, sort_x64_pdata);
+		   (size_t) (x / FUNCTION_TABLE_ENTRY_SIZE),
+		   FUNCTION_TABLE_ENTRY_SIZE, sort_x64_pdata);
 	    bfd_set_section_contents (pfinfo->output_bfd, sec,
 				      tmp_data, 0, x);
 	    free (tmp_data);
