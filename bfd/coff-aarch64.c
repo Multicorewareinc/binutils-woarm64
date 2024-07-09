@@ -578,8 +578,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 		input_section, rel->r_vaddr - input_section->vma);
 
 	    bfd_putl32 (val, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -613,7 +612,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= val & 0x3ffffff;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+	    rel->r_vaddr = -1;
 
 	    break;
 	  }
@@ -648,8 +647,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= (val & 0x7ffff) << 5;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -683,8 +681,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= (val & 0x3fff) << 5;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -720,7 +717,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= (val & 0x1ffffc) << 3;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
+	    rel->r_vaddr = -1;
 
 	    break;
 	  }
@@ -757,8 +754,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= (val & 0x1ffffc) << 3;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -786,8 +782,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 		input_section, rel->r_vaddr - input_section->vma);
 
 	    bfd_putl32 (val, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -831,8 +826,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= val << 10;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -854,8 +848,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    opcode |= val << 10;
 
 	    bfd_putl32 (opcode, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -875,8 +868,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 		input_section, rel->r_vaddr - input_section->vma);
 
 	    bfd_putl32 (val, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
@@ -900,8 +892,7 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 
 
 	    bfd_putl16 (idx, contents + rel->r_vaddr);
-	    rel->r_type = IMAGE_REL_ARM64_ABSOLUTE;
-
+	    rel->r_vaddr = -1;
 	    break;
 	  }
 
