@@ -254,18 +254,20 @@ typedef enum seh_kind {
 
 /* Forward declarations.  */
 static void obj_coff_seh_stackalloc (int);
-static void obj_coff_seh_setframe (int);
 static void obj_coff_seh_endprologue (int);
+static void obj_coff_seh_endproc (int);
+static void obj_coff_seh_proc (int);
+static void obj_coff_seh_handler (int);
+static void obj_coff_seh_handlerdata (int);
+#if !defined (COFFAARCH64)
+static void obj_coff_seh_setframe (int);
 static void obj_coff_seh_save (int);
 static void obj_coff_seh_pushreg (int);
 static void obj_coff_seh_pushframe (int);
-static void obj_coff_seh_endproc  (int);
 static void obj_coff_seh_eh (int);
 static void obj_coff_seh_32 (int);
-static void obj_coff_seh_proc  (int);
-static void obj_coff_seh_handler (int);
-static void obj_coff_seh_handlerdata (int);
 static void obj_coff_seh_code (int);
+#endif
 
 #define UNDSEC bfd_und_section_ptr
 
