@@ -113,6 +113,37 @@ typedef enum seh_arm64_unwind_types
 	{"seh_code", obj_coff_seh_code, 0}, \
 	{"seh_handlerdata", obj_coff_seh_handlerdata, 0},
 
+#if defined (COFFAARCH64)
+#undef SEH_CMDS
+#define SEH_CMDS \
+	{"seh_proc", obj_coff_seh_proc, 0}, \
+	{"seh_endproc", obj_coff_seh_endproc, 0}, \
+	{"seh_endprologue", obj_coff_seh_endprologue, 0}, \
+	{"seh_startepilogue", obj_coff_seh_startepilogue, 0}, \
+	{"seh_endepilogue", obj_coff_seh_endepilogue, 0}, \
+	{"seh_stackalloc", obj_coff_seh_stackalloc, 0}, \
+	{"seh_handler", obj_coff_seh_handler, 0}, \
+	{"seh_handlerdata", obj_coff_seh_handlerdata, 0}, \
+	{"seh_endfunclet", obj_coff_seh_endfunclet, 0}, \
+	{"seh_save_reg", obj_coff_seh_save_reg, save_reg}, \
+	{"seh_save_reg_x", obj_coff_seh_save_reg, save_reg_x}, \
+	{"seh_save_regp", obj_coff_seh_save_reg, save_regp}, \
+	{"seh_save_regp_x", obj_coff_seh_save_reg, save_regp_x}, \
+	{"seh_save_lrpair", obj_coff_seh_save_reg, save_lrpair}, \
+	{"seh_save_fregp", obj_coff_seh_save_reg, save_fregp}, \
+	{"seh_save_fregp_x", obj_coff_seh_save_reg, save_fregp_x}, \
+	{"seh_save_freg", obj_coff_seh_save_reg, save_freg}, \
+	{"seh_save_freg_x", obj_coff_seh_save_reg, save_freg_x}, \
+	{"seh_save_fplr", obj_coff_seh_save_reg, save_fplr}, \
+	{"seh_save_fplr_x", obj_coff_seh_save_reg, save_fplr_x}, \
+	{"seh_save_r19r20_x", obj_coff_seh_save_reg, save_r19r20_x}, \
+	{"seh_add_fp", obj_coff_seh_save_reg, add_fp}, \
+	{"seh_nop", obj_coff_seh_save_reg, nop}, \
+	{"seh_pac_sign_lr", obj_coff_seh_save_reg, pac_sign_lr}, \
+	{"seh_set_fp", obj_coff_seh_save_reg, set_fp}, \
+	{"seh_save_next", obj_coff_seh_save_reg, save_next},
+#endif
+
 /* Type definitions.  */
 
 typedef struct seh_prologue_element
