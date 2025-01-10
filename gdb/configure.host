@@ -85,6 +85,7 @@ aarch64*-*-freebsd*)	gdb_host=fbsd ;;
 aarch64*-*-mingw*)	gdb_host=mingw64a
 			gdb_host_obs=mingw-hdep.o
 			;;
+aarch64*-*-cygwin*)	gdb_host=cygwin64 ;;
 
 alpha*-*-linux*)	gdb_host=alpha-linux ;;
 alpha*-*-netbsdaout* | alpha*-*-knetbsdaout*-gnu)
