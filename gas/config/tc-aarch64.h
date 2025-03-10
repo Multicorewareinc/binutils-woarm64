@@ -210,10 +210,16 @@ struct aarch64_frag_type
    (fr_fix) plus 4 bytes to contain the repeating NOP (fr_var).  */
 #define MAX_MEM_FOR_RS_ALIGN_CODE(p2align, max) (3 + 4)
 
+/* Sections are assumed to start aligned.  In executable section, there is no
+   MAP_DATA symbol pending.  So we only align the address during
+   MAP_DATA --> MAP_INSN transition.
+   For other sections, this is not guaranteed.  */
 #define md_do_align(N, FILL, LEN, MAX, LABEL)					\
   if (FILL == NULL && (N) != 0 && ! need_pass_2 && subseg_text_p (now_seg))	\
     {										\
-      frag_align_code (N, MAX);							\
+      enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;	\
+      if (mapstate == MAP_DATA)							\
+	frag_align_code (N, MAX);						\
       goto LABEL;								\
     }
 
