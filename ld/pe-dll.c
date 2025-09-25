@@ -1538,10 +1538,15 @@ pe_find_data_imports (const char *symhead,
 	    undef->u.def.value = sym->u.def.value;
 	    undef->u.def.section = sym->u.def.section;
 
+#if !defined (COFF_WITH_peAArch64)
 	    /* We replace the original name with the __imp_ prefixed one, this
 	       1) may trash memory 2) leads to duplicate symbols.  But this is
-	       better than having a misleading name that can confuse GDB.  */
+	       better than having a misleading name that can confuse GDB.
+
+	       On AArch64, it should not be changed, as a jump stub will be generated
+	       for the same function name.  */
 	    undef->root.string = sym->root.string;
+#endif
 
 	    if (link_info.pei386_auto_import == -1)
 	      {
@@ -2842,6 +2847,71 @@ pe_create_runtime_relocator_reference (bfd *parent)
   return abfd;
 }
 
+#if defined (COFF_WITH_peAArch64)
+static void
+aarch64_make_jump_stub(const char* symbol_name, bfd* parent)
+{
+  static struct bfd_hash_table *stub_hash = NULL;
+  if (!stub_hash) {
+    stub_hash = (struct bfd_hash_table *) xmalloc (sizeof (struct bfd_hash_table));
+    bfd_hash_table_init (stub_hash, bfd_hash_newfunc, sizeof (struct bfd_hash_entry));
+  }
+
+  if (pe_dll_extra_pe_debug)
+    printf ("validate jump stub for %s\n", symbol_name);
+
+  if (bfd_hash_lookup(stub_hash, symbol_name, false, false))
+    return;
+
+  if (pe_dll_extra_pe_debug)
+    printf ("creating jump stub for %s\n", symbol_name);
+  bfd_hash_lookup(stub_hash, symbol_name, true, true);
+
+  asection *tx;
+  unsigned char *td = NULL;
+  char *oname;
+  bfd *abfd;
+  const unsigned char *jmp_bytes = NULL;
+  int jmp_byte_count = 0;
+  jmp_bytes = jmp_aarch64_bytes;
+  jmp_byte_count = sizeof (jmp_aarch64_bytes);
+  static int tmp_stub_seq = 0;
+
+  oname = xasprintf ("jump_stub_d%06d.o", tmp_stub_seq);
+  ++tmp_stub_seq;
+
+  abfd = bfd_create (oname, parent);
+  free (oname);
+  bfd_make_writable (abfd);
+
+  bfd_set_format (abfd, bfd_object);
+  bfd_set_arch_mach (abfd, pe_details->bfd_arch, 0);
+
+  symptr = 0;
+  symtab = xmalloc (12 * sizeof (asymbol *));
+
+  tx  = quick_section (abfd, ".text", SEC_CODE | SEC_HAS_CONTENTS | SEC_READONLY, 2);
+  quick_symbol (abfd, "", symbol_name, "", tx, BSF_GLOBAL, 0);
+  quick_symbol (abfd, "__imp_", symbol_name, "", bfd_und_section_ptr,
+		BSF_GLOBAL, 0);
+
+  bfd_set_section_size (tx, jmp_byte_count);
+  td = xmalloc (jmp_byte_count);
+  tx->contents = td;
+  memcpy (td, jmp_bytes, jmp_byte_count);
+
+  quick_reloc (abfd, 0, BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL, 2);
+  quick_reloc (abfd, 4, BFD_RELOC_AARCH64_ADD_LO12, 2);
+  save_relocs (tx);
+
+  bfd_set_symtab (abfd, symtab, symptr);
+
+  bfd_set_section_contents (abfd, tx, td, 0, jmp_byte_count);
+  bfd_make_readable (abfd);
+  add_bfd_to_link (abfd, bfd_get_filename (abfd), &link_info);
+}
+#endif
+
 void
 pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name,
 			const char *symname)
@@ -2885,6 +2955,17 @@ pe_create_import_fixup (arelent *rel, asection *s, bfd_vma addend, char *name,
   if ((addend != 0 && link_info.pei386_runtime_pseudo_reloc == 1)
       || link_info.pei386_runtime_pseudo_reloc == 2)
     {
+#if defined (COFF_WITH_peAArch64)
+
+      if (rel->howto->bitsize == 26)
+	{
+/* On AArch64, a single opcode is not sufficient for relocation
+   in dynamic linking. The linker generates a jump stub instead.  */
+	  aarch64_make_jump_stub(name, s->owner);
+	  return;
+	}
+#endif
+
       if (pe_dll_extra_pe_debug)
 	printf ("creating runtime pseudo-reloc entry for %s (addend=%d)\n",
 		fixup_name, (int) addend);

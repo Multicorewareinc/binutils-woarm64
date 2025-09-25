@@ -1169,6 +1169,28 @@ read_addend (arelent *rel, asection *s)
 
   switch (rel->howto->bitsize)
     {
+#if defined (COFF_WITH_peAArch64)
+    case 12:
+      ok = bfd_get_section_contents (s->owner, s, &addend, rel->address, 4);
+      if (!ok)
+        break;
+      addend = (addend >> 10) & ((1 << 12) - 1);
+      break;
+    case 21:
+      ok = bfd_get_section_contents (s->owner, s, &addend, rel->address, 4);
+      if (!ok)
+        break;
+      addend = (((addend >> 5) & ((1 << 19) - 1)) << 2) | ((addend >> 29) & ((1 << 2) - 1));
+      addend <<= 12;
+      break;
+    case 26:
+      ok = bfd_get_section_contents (s->owner, s, &addend, rel->address, 4);
+      if (!ok)
+        break;
+      addend = addend & ((1 << 12) - 1);
+      addend <<= 2;
+      break;
+#endif
     case 8:
       ok = bfd_get_section_contents (s->owner, s, buf, rel->address, 1);
       if (ok)
