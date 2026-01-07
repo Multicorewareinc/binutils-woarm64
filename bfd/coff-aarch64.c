@@ -709,6 +709,37 @@ coff_pe_aarch64_relocate_section (bfd *output_bfd,
 	    if (addend & 0x100000)
 	      addend |= 0xffffffffffe00000;
 
+  /* ---- ABS fix: small ABS constants must not use ADRP ----
+       Only do this for the usual ADRP+ADD pair:
+         adrp xD, sym
+         add  xD, xD, :lo12:sym
+       For ABS sym < 4096 and ADRP-addend==0 pages, rewrite ADRP -> MOVZ #0.
+       Then PAGEOFFSET_12A will patch the ADD immediate to become the constant. */
+if (bfd_is_abs_section (sec)
+    && dest_vma < COFF_PAGE_SIZE
+    && addend == 0
+    && rel + 1 < relend
+    && (rel + 1)->r_type == IMAGE_REL_ARM64_PAGEOFFSET_12A
+    && (rel + 1)->r_symndx == rel->r_symndx
+    && (rel + 1)->r_vaddr == rel->r_vaddr + 4)
+  {
+    uint32_t next = bfd_getl32 (contents + (rel + 1)->r_vaddr);
+
+    unsigned rd  = opcode & 0x1f;        /* ADRP destination register */
+    unsigned rn2 = (next >> 5) & 0x1f;   /* ADD source register */
+    unsigned rd2 = next & 0x1f;          /* ADD destination register */
+
+    if (rd == rn2 && rd == rd2)
+      {
+        /* MOVZ Xd, #0 (64-bit). */
+        bfd_putl32 (0xD2800000 | rd,
+                    contents + rel->r_vaddr);
+
+        /* Mark this reloc handled so generic relocation won't touch it. */
+        rel->r_vaddr = (bfd_vma) -1;
+        break;
+      }
+  } 
 	    dest_vma += addend;
 	    cur_vma = input_section->output_section->vma
 		      + input_section->output_offset
@@ -1094,4 +1125,3 @@ const bfd_target
   &bigobj_swap_table
 };
 #endif
-
