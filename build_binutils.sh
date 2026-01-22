@@ -2,10 +2,11 @@
 set -e
 set -x
 
+git clone https://github.com/thiru-mcw/binutils-woarm64-own.git binutils
 
-export TOOLCHAIN_PATH=/home/HCKTest/file2/toolchain/aarch64-pc-cygwin
-export SOURCE_PATH=/home/HCKTest/file2/binutils-woarm64-own
-export BUILD_PATH=/home/HCKTest/file2/build
+export TOOLCHAIN_PATH="$PWD/toolchain/aarch64-pc-cygwin"
+export SOURCE_PATH="$PWD/binutils"
+export BUILD_PATH="$PWD/build"
 
 
 export CC=aarch64-pc-cygwin-gcc
@@ -52,5 +53,13 @@ $SOURCE_PATH/configure \
 
 make -j$(nproc)
 
-make install-bfd install-libiberty
+cp build/bfd/libbfd.a "$TOOLCHAIN_PATH/lib"
+cp build/libiberty/libiberty.a "$TOOLCHAIN_PATH/lib"
+cp build/libsframe/libsframe.a "$TOOLCHAIN_PATH/lib"
+cp build/zlib/libz.a "$TOOLCHAIN_PATH/lib"
 
+cp build/bfd/bfd.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
+cp binutils/include/diagnostics.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
+
+
+echo "===========Please add libiconv and libintl in $TOOLCHAIN_PATH/lib================"
