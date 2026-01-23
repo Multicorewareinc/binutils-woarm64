@@ -29,7 +29,7 @@ cd $BUILD_PATH
     # --enable-install-libbfd \
     #    --enable-64-bit-bfd \
     #    --disable-gdbserver
-        #--enable-targets=all \
+    #--enable-targets=all \
 
 echo "=== Configuring native BFD for aarch64-pc-cygwin ==="
 $SOURCE_PATH/configure \
@@ -48,18 +48,21 @@ $SOURCE_PATH/configure \
     --disable-libdecnumber \
     --disable-readline \
     --disable-sim \
-    --disable-gdbserver
+    --disable-binutils \
+    --disable-gdbserver \
+    --disable-gas \
+    --disable-ld
 
 
 make -j$(nproc)
 
-cp build/bfd/libbfd.a "$TOOLCHAIN_PATH/lib"
-cp build/libiberty/libiberty.a "$TOOLCHAIN_PATH/lib"
-cp build/libsframe/libsframe.a "$TOOLCHAIN_PATH/lib"
-cp build/zlib/libz.a "$TOOLCHAIN_PATH/lib"
+cp $BUILD_PATH/bfd/.libs/libbfd.a "$TOOLCHAIN_PATH/lib"
+cp $BUILD_PATH/libiberty/libiberty.a "$TOOLCHAIN_PATH/lib"
+cp $BUILD_PATH/libsframe/.libs/libsframe.a "$TOOLCHAIN_PATH/lib"
+cp $BUILD_PATH/zlib/libz.a "$TOOLCHAIN_PATH/lib"
 
-cp build/bfd/bfd.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
-cp binutils/include/diagnostics.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
+cp $BUILD_PATH/bfd/bfd.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
+cp $SOURCE_PATH/include/diagnostics.h "$TOOLCHAIN_PATH/aarch64-pc-cygwin/include"
 
 
 echo "===========Please add libiconv and libintl in $TOOLCHAIN_PATH/lib================"
