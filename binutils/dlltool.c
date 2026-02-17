@@ -559,10 +559,11 @@ static const unsigned char mcore_le_jtab[] =
 
 static const unsigned char aarch64_jtab[] =
 {
-  0x10, 0x00, 0x00, 0x90, /* adrp x16, 0	*/
-  0x10, 0x02, 0x00, 0x91, /* add x16, x16, #0x0 */
-  0x10, 0x02, 0x40, 0xf9, /* ldr x16, [x16]	*/
-  0x00, 0x02, 0x1f, 0xd6  /* br x16		*/
+  0x70, 0x00, 0x00, 0x58, /* ldr  x16, #12 (literal load - PC+12) */
+  0x10, 0x02, 0x40, 0xf9, /* ldr  x16, [x16]                    */
+  0x00, 0x02, 0x1f, 0xd6, /* br   x16                           */
+  0x00, 0x00, 0x00, 0x00, /* .quad __imp_symbol (low 32)         */
+  0x00, 0x00, 0x00, 0x00  /* .quad __imp_symbol (high 32)        */
 };
 
 static const char i386_trampoline[] =
@@ -2466,9 +2467,6 @@ make_one_lib_file (export_type *exp, int i, int delay)
 
 	      rpp_len = delay ? 4 : 2;
 
-	      if (machine == MAARCH64)
-		rpp_len++;
-
 	      rpp = xmalloc (sizeof (arelent *) * rpp_len);
 	      rpp[0] = rel;
 	      rpp[1] = 0;
@@ -2497,19 +2495,11 @@ make_one_lib_file (export_type *exp, int i, int delay)
 		}
 	      else if (machine == MAARCH64)
 		{
-		  arelent *rel_add;
+      rel->address = 12;  /* offset of the 64-bit literal in aarch64_jtab */
+      rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_64);
+      rel->sym_ptr_ptr = iname_pp;
 
-		  rel->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL);
-		  rel->sym_ptr_ptr = secdata[IDATA5].sympp;
-
-		  rel_add = xmalloc (sizeof (arelent));
-		  rel_add->address = 4;
-		  rel_add->howto = bfd_reloc_type_lookup (abfd, BFD_RELOC_AARCH64_ADD_LO12);
-		  rel_add->sym_ptr_ptr = secdata[IDATA5].sympp;
-		  rel_add->addend = 0;
-
-		  rpp[rpp_len - 2] = rel_add;
-		  rpp[rpp_len - 1] = 0;
+      rpp[1] = 0;
 		}
 	      else
 		{
