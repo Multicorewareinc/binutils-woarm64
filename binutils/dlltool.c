@@ -2743,6 +2743,8 @@ make_head (void)
   if (!no_idata5)
     {
       fprintf (f, "\t.section\t.idata$5\n");
+      if (machine == MAARCH64)
+        fprintf (f, "\t.align 3\n");
       if (use_nul_prefixed_import_tables)
 	{
 	  if (create_for_pep)
