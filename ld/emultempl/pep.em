@@ -9,7 +9,7 @@ fi
 case ${target} in
   aarch64-*-cygwin*)
     move_default_addr_high=1
-    cygwin_behavior=0;
+    mingw_behavior=1
     ;;
   *-*-cygwin*)
     move_default_addr_high=1
