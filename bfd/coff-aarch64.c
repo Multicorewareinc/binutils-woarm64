@@ -738,7 +738,7 @@ if (bfd_is_abs_section (sec)
                     contents + rel->r_vaddr);
 
         /* Mark this reloc handled so generic relocation won't touch it. */
-        rel->r_vaddr = (bfd_vma) -1;
+        rel->r_ignore = 1;
         break;
       }
   } 
