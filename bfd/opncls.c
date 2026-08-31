@@ -150,8 +150,12 @@ _bfd_delete_bfd (bfd *abfd)
   if (abfd->memory && abfd->xvec)
     bfd_free_cached_info (abfd);
 
-  /* The target _bfd_free_cached_info may not have done anything..  */
-  bfd_hash_table_free (&abfd->section_htab);
+  /* The target _bfd_free_cached_info may not have done anything..
+     Guard the free: bfd_free_cached_info above may have released the
+     objalloc that section_htab.memory points into, leaving it dangling
+     rather than NULL, so objalloc_free's null check does not help.  */
+  if (abfd->section_htab.memory)
+    bfd_hash_table_free (&abfd->section_htab);
   if (abfd->memory)
     objalloc_free (abfd->memory);
 
@@ -185,7 +189,12 @@ DESCRIPTION
 bool
 _bfd_free_cached_info (bfd *abfd)
 {
-  bfd_hash_table_free (&abfd->section_htab);
+  /* The target's _bfd_free_cached_info may already have released the
+     objalloc that section_htab.memory points into, leaving it dangling
+     rather than NULL (bfd_make_readable calls both in sequence), so
+     objalloc_free's null check does not help here.  */
+  if (abfd->section_htab.memory)
+    bfd_hash_table_free (&abfd->section_htab);
 
   abfd->sections = NULL;
   abfd->section_last = NULL;
